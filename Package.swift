@@ -1,22 +1,22 @@
-// swift-tools-version:5.1
-// The swift-tools-version declares the minimum version of Swift required to build this package.
+// swift-tools-version:5.3
 
 import PackageDescription
 
 let package = Package(
     name: "PanModal",
-    platforms: [.iOS(.v10)],
+    platforms: [.iOS(.v13)],
     products: [
         .library(
             name: "PanModal",
-            targets: ["PanModal"]),
+            targets: ["PanModal"]
+        ),
     ],
     dependencies: [],
     targets: [
         .target(
             name: "PanModal",
             dependencies: [],
-            path: "PanModal")
-    ],
-    swiftLanguageVersions: [.version("5.0")]
+            path: "PanModal"
+        )
+    ]
 )

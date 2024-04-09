@@ -5,7 +5,6 @@
 //  Copyright © 2019 Tiny Speck, Inc. All rights reserved.
 //
 
-#if os(iOS)
 import UIKit
 
 /**
@@ -25,7 +24,8 @@ extension UIViewController: PanModalPresenter {
      a strong reference to this view controller and in turn, creating a memory leak.
      */
     public var isPanModalPresented: Bool {
-        return (transitioningDelegate as? PanModalPresentationDelegate) != nil
+        return children.first(where: { $0.isKind(of: PanModalWrappedViewController.self) }) != nil
+            || (transitioningDelegate as? PanModalPresentationDelegate) != nil
     }
 
     /**
@@ -35,32 +35,27 @@ extension UIViewController: PanModalPresenter {
         - viewControllerToPresent: The view controller to be presented
         - sourceView: The view containing the anchor rectangle for the popover.
         - sourceRect: The rectangle in the specified view in which to anchor the popover.
-        - completion: The block to execute after the presentation finishes. You may specify nil for this parameter.
 
      - Note: sourceView & sourceRect are only required for presentation on an iPad.
      */
-    public func presentPanModal(_ viewControllerToPresent: PanModalPresentable.LayoutType,
-                                sourceView: UIView? = nil,
-                                sourceRect: CGRect = .zero,
-                                completion: (() -> Void)? = nil) {
+    public func presentPanModal(_ viewControllerToPresent: PanModalPresentable.LayoutType, sourceView: UIView? = nil, sourceRect: CGRect = .zero) {
 
-        /**
-         Here, we deliberately do not check for size classes. More info in `PanModalPresentationDelegate`
-         */
+        switch viewControllerToPresent.presentStyle {
+        case .present:
+            /**
+             Here, we deliberately do not check for size classes. More info in `PanModalPresentationDelegate`
+             */
 
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            viewControllerToPresent.modalPresentationStyle = .popover
-            viewControllerToPresent.popoverPresentationController?.sourceRect = sourceRect
-            viewControllerToPresent.popoverPresentationController?.sourceView = sourceView ?? view
-            viewControllerToPresent.popoverPresentationController?.delegate = PanModalPresentationDelegate.default
-        } else {
             viewControllerToPresent.modalPresentationStyle = .custom
             viewControllerToPresent.modalPresentationCapturesStatusBarAppearance = true
             viewControllerToPresent.transitioningDelegate = PanModalPresentationDelegate.default
+
+            present(viewControllerToPresent, animated: true, completion: nil)
+        case .embed:
+            let wrappedVC = PanModalWrappedViewController(panModal: viewControllerToPresent,
+                                                          container: self)
+            wrappedVC.presentPresentedViewController()
         }
 
-        present(viewControllerToPresent, animated: true, completion: completion)
     }
-
 }
-#endif

@@ -10,7 +10,7 @@ import UIKit
 
 class TransientAlertViewController: AlertViewController {
 
-    private weak var timer: Timer?
+    private var timer: Timer?
     private var countdown: Int = 5
 
     override func viewDidLoad() {
@@ -26,16 +26,18 @@ class TransientAlertViewController: AlertViewController {
 
     private func startTimer() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.countdown -= 1
-            self?.updateMessage()
-        }
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(TransientAlertViewController.updateMessage), userInfo: nil, repeats: true)
     }
 
     @objc func updateMessage() {
+        countdown -= 1
         guard countdown > 0 else {
             invalidateTimer()
-            dismiss(animated: true, completion: nil)
+            if presentingViewController != nil {
+                dismiss(animated: true, completion: nil)
+            } else {
+                navigationController?.popViewController(animated: true)
+            }
             return
         }
         alertView.message.text = "Message disppears in \(countdown) seconds"

@@ -5,7 +5,6 @@
 //  Copyright © 2017 Tiny Speck, Inc. All rights reserved.
 //
 
-#if os(iOS)
 import UIKit
 
 /**
@@ -15,12 +14,13 @@ import UIKit
  Usage:
  ```
  extension YourViewController: PanModalPresentable {
-    func shouldRoundTopCorners: Bool { return false }
+    func showDragIndicator: Bool { return false }
  }
  ```
  */
-public protocol PanModalPresentable: AnyObject {
+public protocol PanModalPresentable {
 
+    var presentStyle: PanModalPresentStyle { get }
     /**
      The scroll view embedded in the view controller.
      Setting this value allows for seamless transition scrolling between the embedded scroll view
@@ -56,13 +56,6 @@ public protocol PanModalPresentable: AnyObject {
     var longFormHeight: PanModalHeight { get }
 
     /**
-     The corner radius used when `shouldRoundTopCorners` is enabled.
-
-     Default Value is 8.0.
-     */
-    var cornerRadius: CGFloat { get }
-
-    /**
      The springDamping value used to determine the amount of 'bounce'
      seen when transitioning to short/long form.
 
@@ -71,28 +64,12 @@ public protocol PanModalPresentable: AnyObject {
     var springDamping: CGFloat { get }
 
     /**
-     The transitionDuration value is used to set the speed of animation during a transition,
-     including initial presentation.
-
-     Default value is 0.5.
-    */
-    var transitionDuration: Double { get }
-
-    /**
-     The animation options used when performing animations on the PanModal, utilized mostly
-     during a transition.
-
-     Default value is [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState].
-    */
-    var transitionAnimationOptions: UIView.AnimationOptions { get }
-
-    /**
      The background view color.
 
      - Note: This is only utilized at the very start of the transition.
 
      Default Value is black with alpha component 0.7.
-    */
+     */
     var panModalBackgroundColor: UIColor { get }
 
     /**
@@ -101,7 +78,7 @@ public protocol PanModalPresentable: AnyObject {
      Default value is light gray.
     */
     var dragIndicatorBackgroundColor: UIColor { get }
-
+    
     /**
      We configure the panScrollable's scrollIndicatorInsets interally so override this value
      to set custom insets.
@@ -134,14 +111,19 @@ public protocol PanModalPresentable: AnyObject {
      Default value is true.
      */
     var allowsDragToDismiss: Bool { get }
-
+    
     /**
      A flag to determine if dismissal should be initiated when tapping on the dimmed background view.
-
+     
      Default value is true.
      */
     var allowsTapToDismiss: Bool { get }
 
+    /**
+     Default value is true
+     */
+    var allowScrollViewDragToDismiss: Bool { get }
+    
     /**
      A flag to toggle user interactions on the container view.
 
@@ -152,26 +134,16 @@ public protocol PanModalPresentable: AnyObject {
     var isUserInteractionEnabled: Bool { get }
 
     /**
-     A flag to determine if haptic feedback should be enabled during presentation.
-
-     Default value is true.
-     */
-    var isHapticFeedbackEnabled: Bool { get }
-
-    /**
-     A flag to determine if the top corners should be rounded.
-
-     Default value is true.
-     */
-    var shouldRoundTopCorners: Bool { get }
-
-    /**
      A flag to determine if a drag indicator should be shown
      above the pan modal container view.
 
      Default value is true.
      */
     var showDragIndicator: Bool { get }
+    
+    var indicatorColor: UIColor { get }
+
+    var panCustomTopView: PanCustomTopView? { get }
 
     /**
      Asks the delegate if the pan modal should respond to the pan modal gesture recognizer.
@@ -211,14 +183,14 @@ public protocol PanModalPresentable: AnyObject {
 
      Default value is true.
      */
-    func shouldTransition(to state: PanModalPresentationController.PresentationState) -> Bool
+    func shouldTransition(to state: PanModalPresentationState) -> Bool
 
     /**
      Notifies the delegate that the pan modal is about to transition to a new state.
 
      Default value is an empty implementation.
      */
-    func willTransition(to state: PanModalPresentationController.PresentationState)
+    func willTransition(to state: PanModalPresentationState)
 
     /**
      Notifies the delegate that the pan modal is about to be dismissed.
@@ -227,11 +199,4 @@ public protocol PanModalPresentable: AnyObject {
      */
     func panModalWillDismiss()
 
-    /**
-     Notifies the delegate after the pan modal is dismissed.
-
-     Default value is an empty implementation.
-     */
-    func panModalDidDismiss()
 }
-#endif

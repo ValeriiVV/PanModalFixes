@@ -12,17 +12,13 @@ class NavigationController: UINavigationController, PanModalPresentable {
 
     private let navGroups = NavUserGroups()
 
-    init() {
-        super.init(nibName: nil, bundle: nil)
-        viewControllers = [navGroups]
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        fatalError()
-    }
-
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        pushViewController(navGroups, animated: false)
     }
 
     override func popViewController(animated: Bool) -> UIViewController? {

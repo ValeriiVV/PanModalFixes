@@ -5,7 +5,6 @@
 //  Copyright © 2019 Tiny Speck, Inc. All rights reserved.
 //
 
-#if os(iOS)
 import UIKit
 
 /**
@@ -17,24 +16,19 @@ struct PanModalAnimator {
      Constant Animation Properties
      */
     struct Constants {
-        static let defaultTransitionDuration: TimeInterval = 0.5
+        static let transitionDuration: TimeInterval = 0.5
     }
 
     static func animate(_ animations: @escaping PanModalPresentable.AnimationBlockType,
                         config: PanModalPresentable?,
                         _ completion: PanModalPresentable.AnimationCompletionType? = nil) {
 
-        let transitionDuration = config?.transitionDuration ?? Constants.defaultTransitionDuration
-        let springDamping = config?.springDamping ?? 1.0
-        let animationOptions = config?.transitionAnimationOptions ?? []
-
-        UIView.animate(withDuration: transitionDuration,
+        UIView.animate(withDuration: Constants.transitionDuration,
                        delay: 0,
-                       usingSpringWithDamping: springDamping,
+                       usingSpringWithDamping: config?.springDamping ?? 1.0,
                        initialSpringVelocity: 0,
-                       options: animationOptions,
+                       options: [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState],
                        animations: animations,
                        completion: completion)
     }
 }
-#endif

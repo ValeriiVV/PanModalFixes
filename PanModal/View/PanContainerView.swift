@@ -5,7 +5,6 @@
 //  Copyright © 2018 Tiny Speck, Inc. All rights reserved.
 //
 
-#if os(iOS)
 import UIKit
 
 /**
@@ -21,9 +20,8 @@ class PanContainerView: UIView {
         addSubview(presentedView)
     }
 
-    @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        fatalError()
     }
 
 }
@@ -35,10 +33,7 @@ extension UIView {
      from the view hierachy
      */
     var panContainerView: PanContainerView? {
-        return subviews.first(where: { view -> Bool in
-            view is PanContainerView
-        }) as? PanContainerView
+        return subviews.compactMap({ $0 as? PanContainerView }).first
     }
 
 }
-#endif

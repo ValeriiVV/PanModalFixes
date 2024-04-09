@@ -1,3 +1,4 @@
+import PanModal
 //
 //  SampleViewController.swift
 //  PanModal
@@ -50,9 +51,7 @@ class SampleViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        guard let rowType = RowType(rawValue: indexPath.row) else {
-            return
-        }
+        guard let rowType = RowType(rawValue: indexPath.row) else { return }
         dismiss(animated: true, completion: nil)
         presentPanModal(rowType.presentable.rowVC)
     }
@@ -67,59 +66,58 @@ private extension SampleViewController {
 
     enum RowType: Int, CaseIterable {
         case basic
-        case fullScreen
         case alert
         case transientAlert
         case userGroups
         case stacked
         case navController
-
+        case embed
 
         var presentable: RowPresentable {
             switch self {
             case .basic: return Basic()
-            case .fullScreen: return FullScreen()
             case .alert: return Alert()
             case .transientAlert: return TransientAlert()
             case .userGroups: return UserGroup()
             case .stacked: return Stacked()
             case .navController: return Navigation()
+            case .embed: return Embed()
             }
         }
 
         struct Basic: RowPresentable {
-            let string: String = "Basic"
-            let rowVC: PanModalPresentable.LayoutType = BasicViewController()
-        }
-
-        struct FullScreen: RowPresentable {
-            let string: String = "Full Screen"
-            let rowVC: PanModalPresentable.LayoutType = FullScreenNavController()
+            var string: String { return "Basic" }
+            var rowVC: PanModalPresentable.LayoutType { return BasicViewController() }
         }
 
         struct Alert: RowPresentable {
-            let string: String = "Alert"
-            let rowVC: PanModalPresentable.LayoutType = AlertViewController()
+            var string: String { return "Alert" }
+            var rowVC: PanModalPresentable.LayoutType { return AlertViewController() }
         }
 
         struct TransientAlert: RowPresentable {
-            let string: String = "Alert (Transient)"
-            let rowVC: PanModalPresentable.LayoutType = TransientAlertViewController()
+            var string: String { return "Alert (Transient)"}
+            var rowVC: PanModalPresentable.LayoutType { return TransientAlertViewController() }
         }
 
         struct UserGroup: RowPresentable {
-            let string: String = "User Groups"
-            let rowVC: PanModalPresentable.LayoutType = UserGroupViewController()
+            var string: String { return "User Groups" }
+            var rowVC: PanModalPresentable.LayoutType { return UserGroupViewController() }
         }
 
         struct Navigation: RowPresentable {
-            let string: String = "User Groups (NavigationController)"
-            let rowVC: PanModalPresentable.LayoutType = NavigationController()
+            var string: String { return "User Groups (NavigationController)" }
+            var rowVC: PanModalPresentable.LayoutType { return NavigationController() }
         }
 
         struct Stacked: RowPresentable {
-            let string: String = "User Groups (Stacked)"
-            let rowVC: PanModalPresentable.LayoutType = UserGroupStackedViewController()
+            var string: String { return "User Groups (Stacked)" }
+            var rowVC: PanModalPresentable.LayoutType { return UserGroupStackedViewController() }
+        }
+
+        struct Embed: RowPresentable {
+            var string: String { return "Embed" }
+            var rowVC: PanModalPresentable.LayoutType { return EmbedViewController() }
         }
     }
 }

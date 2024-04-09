@@ -5,7 +5,6 @@
 //  Copyright © 2018 Tiny Speck, Inc. All rights reserved.
 //
 
-#if os(iOS)
 import UIKit
 
 /**
@@ -26,8 +25,18 @@ public extension PanModalPresentable where Self: UIViewController {
      A function wrapper over the `transition(to state: PanModalPresentationController.PresentationState)`
      function in the PanModalPresentationController.
      */
-    func panModalTransition(to state: PanModalPresentationController.PresentationState) {
+    func panModalTransition(to state: PanModalPresentationState) {
         presentedVC?.transition(to: state)
+    }
+
+    /**
+     Programmatically set the content offset of the pan scrollable.
+
+     This is required to use while in the short form presentation state,
+     as due to content offset observation, setting the content offset directly would fail
+     */
+    func panModalSetContentOffset(offset: CGPoint) {
+        presentedVC?.setContentOffset(offset: offset)
     }
 
     /**
@@ -41,16 +50,6 @@ public extension PanModalPresentable where Self: UIViewController {
     }
 
     /**
-     Operations on the scroll view, such as content height changes, or when inserting/deleting rows can cause the pan modal to jump,
-     caused by the pan modal responding to content offset changes.
-
-     To avoid this, you can call this method to perform scroll view updates, with scroll observation temporarily disabled.
-     */
-    func panModalPerformUpdates(_ updates: () -> Void) {
-        presentedVC?.performUpdates(updates)
-    }
-
-    /**
      A function wrapper over the animate function in PanModalAnimator.
 
      This can be used for animation consistency on views within the presented view controller.
@@ -60,4 +59,3 @@ public extension PanModalPresentable where Self: UIViewController {
     }
 
 }
-#endif

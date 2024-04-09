@@ -5,7 +5,6 @@
 //  Copyright © 2019 Tiny Speck, Inc. All rights reserved.
 //
 
-#if os(iOS)
 import UIKit
 
 /**
@@ -39,24 +38,11 @@ public class PanModalPresentationAnimator: NSObject {
      */
     private let transitionStyle: TransitionStyle
 
-    /**
-     Haptic feedback generator (during presentation)
-     */
-    private var feedbackGenerator: UISelectionFeedbackGenerator?
-
     // MARK: - Initializers
 
     required public init(transitionStyle: TransitionStyle) {
         self.transitionStyle = transitionStyle
         super.init()
-
-        /**
-         Prepare haptic feedback, only during the presentation state
-         */
-        if case .presentation = transitionStyle {
-            feedbackGenerator = UISelectionFeedbackGenerator()
-            feedbackGenerator?.prepare()
-        }
     }
 
     /**
@@ -64,38 +50,37 @@ public class PanModalPresentationAnimator: NSObject {
      */
     private func animatePresentation(transitionContext: UIViewControllerContextTransitioning) {
 
-        guard
-            let toVC = transitionContext.viewController(forKey: .to),
-            let fromVC = transitionContext.viewController(forKey: .from)
+        guard let toVC = transitionContext.viewController(forKey: .to)
             else { return }
 
-        let presentable = panModalLayoutType(from: transitionContext)
+        let presentable = toVC as? PanModalPresentable.LayoutType
 
-        // Calls viewWillAppear and viewWillDisappear
-        fromVC.beginAppearanceTransition(false, animated: true)
-        
         // Presents the view in shortForm position, initially
         let yPos: CGFloat = presentable?.shortFormYPos ?? 0.0
 
         // Use panView as presentingView if it already exists within the containerView
         let panView: UIView = transitionContext.containerView.panContainerView ?? toVC.view
-
+        let topView = transitionContext.containerView.panCustomTopView
+        let topViewHeight: CGFloat = {
+            if let topViewHeight = topView?.frame.height {
+                return topViewHeight + PanModalPresentationController.Constants.customTopViewOffset
+            } else {
+                return 0
+            }
+        }()
+        
         // Move presented view offscreen (from the bottom)
         panView.frame = transitionContext.finalFrame(for: toVC)
-        panView.frame.origin.y = transitionContext.containerView.frame.height
-
-        // Haptic feedback
-        if presentable?.isHapticFeedbackEnabled == true {
-            feedbackGenerator?.selectionChanged()
-        }
+        panView.frame.origin.y = transitionContext.containerView.frame.height + topViewHeight
+        topView?.alpha = 0
+        topView?.frame.origin.y = transitionContext.containerView.frame.height
 
         PanModalAnimator.animate({
             panView.frame.origin.y = yPos
-        }, config: presentable) { [weak self] didComplete in
-            // Calls viewDidAppear and viewDidDisappear
-            fromVC.endAppearanceTransition()
+            topView?.frame.origin.y = yPos - topViewHeight
+            topView?.alpha = 1
+        }, config: presentable) { didComplete in
             transitionContext.completeTransition(didComplete)
-            self?.feedbackGenerator = nil
         }
     }
 
@@ -104,36 +89,27 @@ public class PanModalPresentationAnimator: NSObject {
      */
     private func animateDismissal(transitionContext: UIViewControllerContextTransitioning) {
 
-        guard
-            let toVC = transitionContext.viewController(forKey: .to),
-            let fromVC = transitionContext.viewController(forKey: .from)
+        guard let fromVC = transitionContext.viewController(forKey: .from)
             else { return }
 
-        // Calls viewWillAppear and viewWillDisappear
-        toVC.beginAppearanceTransition(true, animated: true)
-        
-        let presentable = panModalLayoutType(from: transitionContext)
+        let presentable = fromVC as? PanModalPresentable.LayoutType
         let panView: UIView = transitionContext.containerView.panContainerView ?? fromVC.view
-
+        let topView = transitionContext.containerView.panCustomTopView
+        let topViewHeight: CGFloat = {
+            if let topViewHeight = topView?.frame.height {
+                return topViewHeight + PanModalPresentationController.Constants.customTopViewOffset
+            } else {
+                return 0
+            }
+        }()
+        
         PanModalAnimator.animate({
-            panView.frame.origin.y = transitionContext.containerView.frame.height
+            panView.frame.origin.y = transitionContext.containerView.frame.height + PanModalPresentationController.Constants.dragIndicatorHeight + topViewHeight
+            topView?.frame.origin.y = transitionContext.containerView.frame.height
+            topView?.alpha = 0.0
         }, config: presentable) { didComplete in
             fromVC.view.removeFromSuperview()
-            // Calls viewDidAppear and viewDidDisappear
-            toVC.endAppearanceTransition()
             transitionContext.completeTransition(didComplete)
-        }
-    }
-
-    /**
-     Extracts the PanModal from the transition context, if it exists
-     */
-    private func panModalLayoutType(from context: UIViewControllerContextTransitioning) -> PanModalPresentable.LayoutType? {
-        switch transitionStyle {
-        case .presentation:
-            return context.viewController(forKey: .to) as? PanModalPresentable.LayoutType
-        case .dismissal:
-            return context.viewController(forKey: .from) as? PanModalPresentable.LayoutType
         }
     }
 
@@ -147,13 +123,7 @@ extension PanModalPresentationAnimator: UIViewControllerAnimatedTransitioning {
      Returns the transition duration
      */
     public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-
-        guard
-            let context = transitionContext,
-            let presentable = panModalLayoutType(from: context)
-            else { return PanModalAnimator.Constants.defaultTransitionDuration }
-
-        return presentable.transitionDuration
+        return PanModalAnimator.Constants.transitionDuration
     }
 
     /**
@@ -169,4 +139,3 @@ extension PanModalPresentationAnimator: UIViewControllerAnimatedTransitioning {
     }
 
 }
-#endif

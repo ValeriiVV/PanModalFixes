@@ -5,14 +5,16 @@
 //  Copyright © 2018 Tiny Speck, Inc. All rights reserved.
 //
 
-#if os(iOS)
 import UIKit
 
 /**
  Default values for the PanModalPresentable.
  */
 public extension PanModalPresentable where Self: UIViewController {
-
+    var presentStyle: PanModalPresentStyle {
+        return .present
+    }
+    
     var topOffset: CGFloat {
         return topLayoutOffset + 21.0
     }
@@ -31,20 +33,8 @@ public extension PanModalPresentable where Self: UIViewController {
         return .contentHeight(scrollView.contentSize.height)
     }
 
-    var cornerRadius: CGFloat {
-        return 8.0
-    }
-
     var springDamping: CGFloat {
         return 0.8
-    }
-
-    var transitionDuration: Double {
-        return PanModalAnimator.Constants.defaultTransitionDuration
-    }
-
-    var transitionAnimationOptions: UIView.AnimationOptions {
-        return [.curveEaseInOut, .allowUserInteraction, .beginFromCurrentState]
     }
 
     var panModalBackgroundColor: UIColor {
@@ -52,12 +42,11 @@ public extension PanModalPresentable where Self: UIViewController {
     }
 
     var dragIndicatorBackgroundColor: UIColor {
-        return UIColor.lightGray
+        return UIColor.clear
     }
-
+    
     var scrollIndicatorInsets: UIEdgeInsets {
-        let top = shouldRoundTopCorners ? cornerRadius : 0
-        return UIEdgeInsets(top: CGFloat(top), left: 0, bottom: bottomLayoutOffset, right: 0)
+        return UIEdgeInsets(top: 0, left: 0, bottom: bottomLayoutOffset, right: 0)
     }
 
     var anchorModalToLongForm: Bool {
@@ -76,8 +65,12 @@ public extension PanModalPresentable where Self: UIViewController {
     var allowsDragToDismiss: Bool {
         return true
     }
-
+    
     var allowsTapToDismiss: Bool {
+        return true
+    }
+    
+    var allowScrollViewDragToDismiss: Bool {
         return true
     }
 
@@ -85,16 +78,16 @@ public extension PanModalPresentable where Self: UIViewController {
         return true
     }
 
-    var isHapticFeedbackEnabled: Bool {
+    var showDragIndicator: Bool {
         return true
     }
-
-    var shouldRoundTopCorners: Bool {
-        return isPanModalPresented
+    
+    var panCustomTopView: PanCustomTopView? {
+        return nil
     }
-
-    var showDragIndicator: Bool {
-        return shouldRoundTopCorners
+    
+    var indicatorColor: UIColor {
+        return UIColor(red: 241/255.0, green: 243/255.0, blue: 245/255.0, alpha: 1)
     }
 
     func shouldRespond(to panModalGestureRecognizer: UIPanGestureRecognizer) -> Bool {
@@ -105,7 +98,7 @@ public extension PanModalPresentable where Self: UIViewController {
 
     }
 
-    func shouldTransition(to state: PanModalPresentationController.PresentationState) -> Bool {
+    func shouldTransition(to state: PanModalPresentationState) -> Bool {
         return true
     }
 
@@ -113,7 +106,7 @@ public extension PanModalPresentable where Self: UIViewController {
         return false
     }
 
-    func willTransition(to state: PanModalPresentationController.PresentationState) {
+    func willTransition(to state: PanModalPresentationState) {
 
     }
 
@@ -121,8 +114,4 @@ public extension PanModalPresentable where Self: UIViewController {
 
     }
 
-    func panModalDidDismiss() {
-
-    }
 }
-#endif
