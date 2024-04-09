@@ -177,6 +177,12 @@ open class PanModalPresentationController: UIPresentationController {
         guard let containerView = containerView
             else { return }
 
+		// MARK: Баг в библиотеке. Пока фикс не залит пришлось временно импортировать либу непосредственно в проект
+		// https://github.com/slackhq/PanModal/issues/202
+		if self.panContainerView.frame == .zero {
+			self.adjustPresentedViewFrame()
+		}
+
         layoutBackgroundView(in: containerView)
         layoutPresentedView(in: containerView)
         configureScrollViewInsets()
